@@ -7,3 +7,23 @@ pip install opencv-python flask
 ```bash
 python app.py
 ```
+
+
+## Objetivo
+Turbidez
+
+Color del agua
+
+Contaminantes visuales
+
+Detección de especies
+
+Patrones de movimiento
+
+Presencia de espuma o algas
+
+Ondas y condiciones del agua
+
+Cambio en la línea de costa
+
+Vegetación costera

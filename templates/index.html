@@ -3,16 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Subir Imagen de Playa</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <title>Beach Analysis</title>
 </head>
 <body>
-    <h1>Análisis de la Salud del Agua</h1>
-    <p>Sube una imagen de la playa para obtener análisis sobre la calidad del agua.</p>
-
-    <form action="/upload" method="post" enctype="multipart/form-data">
-        <input type="file" name="image" accept="image/*" required>
-        <button type="submit">Subir Imagen</button>
+    <h1>Subir imagen de la playa</h1>
+    <form action="/upload" method="POST" enctype="multipart/form-data">
+        <input type="file" name="file">
+        <button type="submit">Subir y analizar</button>
     </form>
 </body>
 </html>

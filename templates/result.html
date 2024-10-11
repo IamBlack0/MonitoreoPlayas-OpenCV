@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Resultados de Análisis</title>
+</head>
+<body>
+    <h1>Resultados del análisis de la imagen</h1>
+    <img src="{{ image_path }}" alt="Playa analizada" style="max-width: 100%; height: auto;">
+    
+    <p><strong>Turbidez:</strong> {{ results['turbidez'] }}</p>
+    <p><strong>Color promedio del agua (RGB):</strong> {{ results['color'] }}</p>
+
+    <!-- Bloque de color basado en el valor RGB -->
+    <div 
+        style="width: 100px; height: 100px; background-color: rgb({{ results['color'][0] }}, {{ results['color'][1] }}, {{ results['color'][2] }});">
+    </div>
+
+    <p>Este es el color promedio del agua.</p>
+
+    <a href="/">Volver a subir otra imagen</a>
+</body>
+</html>
