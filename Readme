@@ -1,6 +1,9 @@
 ## Instalación
 ```bash
-pip install opencv-python flask
+pip install opencv-python flask scikit-image numpy
+pip install matplotlib
+
+
 ```
 
 ## Uso
