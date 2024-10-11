@@ -1,0 +1,9 @@
+## Instalación
+```bash
+pip install opencv-python flask
+```
+
+## Uso
+```bash
+python app.py
+```
