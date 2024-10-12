@@ -29,44 +29,37 @@ def analyze_image(image_path):
     # Cargar la imagen
     image = cv2.imread(image_path)
 
-    # Segmentar el agua en la imagen
+    # Segmentar el agua
     segmented_image, mask = segment_water(image)
 
     # Convertir la imagen segmentada a RGB
     segmented_rgb = cv2.cvtColor(segmented_image, cv2.COLOR_BGR2RGB)
 
-    # Solo analizar los píxeles que corresponden al agua (según la máscara)
+    # Obtener píxeles de agua basados en la máscara
     water_pixels = segmented_rgb[mask > 0]
 
-    # Calcular el color promedio y la turbidez
+    # Calcular el color promedio y la variabilidad
     if len(water_pixels) > 0:
         avg_color = np.mean(water_pixels, axis=0)
         avg_color_rgb = [int(c) for c in avg_color]
 
-        # Descomponer los valores RGB
-        red, green, blue = avg_color_rgb
+        # Calcular la desviación estándar de los colores para medir la turbidez
+        std_dev = np.std(water_pixels, axis=0)
 
-        # Evaluar la turbidez según los colores
-        if red > 140 and green < 100 and blue < 100:  # Alto contenido de rojo (marrón)
+        # Usar la desviación estándar para estimar la turbidez
+        if np.mean(std_dev) > 50:  # Mayor variabilidad indica más turbidez
             turbidez = 200  # Alta turbidez
             turbidez_level = "Alta"
-        elif blue > 100 and green > 100 and red < 150:  # Azul oscuro
+        elif np.mean(std_dev) > 20:
             turbidez = 100  # Media turbidez
             turbidez_level = "Media"
-        elif blue > 150 and green > 150 and red < 100:  # Alto contenido de azul y verde (claro)
+        elif np.mean(std_dev) > 10:
             turbidez = 20  # Baja turbidez
             turbidez_level = "Baja"
-        else:  # Cualquier otro caso
-            turbidez = 150  # Considerarlo como media
-            turbidez_level = "Media"
-
-        # Ajustar la clasificación si el valor de turbidez es >= 150
-        if turbidez >= 150:
-            turbidez_level = "Alta"
-
+        
     else:
         avg_color_rgb = [0, 0, 0]
-        turbidez = 0  # Si no se detectó agua
+        turbidez = 0
         turbidez_level = "Desconocido"
 
     return {
@@ -74,7 +67,3 @@ def analyze_image(image_path):
         'turbidez_level': turbidez_level,
         'color': avg_color_rgb
     }
-
-
-
-

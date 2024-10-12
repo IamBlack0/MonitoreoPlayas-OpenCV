@@ -4,12 +4,116 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Beach Analysis</title>
+    <style>
+        :root {
+            --primary-color: #4CAF50;
+            --primary-hover: #45a049;
+            --background-color: #f0f0f0;
+            --card-background: #ffffff;
+            --text-color: #333333;
+            --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            --border-radius: 8px;
+            --spacing: 20px;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: var(--background-color);
+            color: var(--text-color);
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: var(--spacing);
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: var(--spacing);
+        }
+
+        .upload-card {
+            background-color: var(--card-background);
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            padding: var(--spacing);
+        }
+
+        .upload-form {
+            display: flex;
+            flex-direction: column;
+            gap: var(--spacing);
+        }
+
+        .file-input {
+            display: none;
+        }
+
+        .file-label {
+            display: inline-block;
+            padding: 10px 15px;
+            background-color: var(--background-color);
+            color: var(--text-color);
+            border: 1px solid var(--text-color);
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            text-align: center;
+        }
+
+        .file-label:hover {
+            background-color: #e0e0e0;
+        }
+
+        .submit-button {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            border-radius: var(--border-radius);
+            transition: background-color 0.3s ease;
+        }
+
+        .submit-button:hover {
+            background-color: var(--primary-hover);
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                padding: calc(var(--spacing) / 2);
+            }
+
+            h1 {
+                font-size: 24px;
+            }
+
+            .submit-button {
+                padding: 10px 15px;
+            }
+        }
+    </style>
 </head>
 <body>
-    <h1>Subir imagen de la playa</h1>
-    <form action="/upload" method="POST" enctype="multipart/form-data">
-        <input type="file" name="file">
-        <button type="submit">Subir y analizar</button>
-    </form>
+    <div class="container">
+        <h1>Subir imagen de la playa</h1>
+        <div class="upload-card">
+            <form action="/upload" method="POST" enctype="multipart/form-data" class="upload-form">
+                <input type="file" name="file" id="file-input" class="file-input" accept="image/*" required>
+                <label for="file-input" class="file-label">Seleccionar imagen</label>
+                <button type="submit" class="submit-button">Subir y analizar</button>
+            </form>
+        </div>
+    </div>
+    <script>
+        document.getElementById('file-input').addEventListener('change', function(e) {
+            var fileName = e.target.files[0].name;
+            document.querySelector('.file-label').textContent = fileName;
+        });
+    </script>
 </body>
 </html>
