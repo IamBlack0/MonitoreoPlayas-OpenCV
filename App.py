@@ -5,9 +5,20 @@ import base64
 
 app = Flask(__name__)
 
+# Cargar el modelo y la configuración para MobileNet SSD
+prototxt_path = 'models/MobileNetSSD_deploy.prototxt'
+model_path = 'models/MobileNetSSD_deploy.caffemodel'
+net = cv2.dnn.readNetFromCaffe(prototxt_path, model_path)
+
+# Lista de clases que el modelo puede detectar
+classes = ["background", "aeroplane", "bicycle", "bird", "boat", "bottle", "bus",
+           "car", "cat", "chair", "cow", "diningtable", "dog", "horse", "motorbike",
+           "person", "plant", "sheep", "sofa", "train", "tvmonitor"]
+
 @app.route('/')
 def index():
-    return render_template('index.html')
+    return render_template('index.html', images_data=[])
+
 
 @app.route('/upload', methods=['POST'])
 def upload():
@@ -31,6 +42,9 @@ def upload():
         # Obtener el nivel de turbidez
         turbidity_level = determine_turbidity_level(average_color)
 
+        # Detectar contaminantes visuales
+        contaminantes_detectados = detect_objects(img)
+
         # Convertir la imagen a un formato que se puede mostrar en HTML
         _, buffer = cv2.imencode('.jpg', img)
         img_base64 = base64.b64encode(buffer).decode('utf-8')
@@ -38,7 +52,8 @@ def upload():
         images_data.append({
             'img_data': img_base64,
             'average_color': average_color,
-            'turbidity_level': turbidity_level
+            'turbidity_level': turbidity_level,
+            'contaminantes': contaminantes_detectados
         })
 
     return render_template('index.html', images_data=images_data)
@@ -77,6 +92,37 @@ def determine_turbidity_level(average_color):
             return "Alta (Agua turbia, lechosa)"
     
     return "Color fuera de rango"
+
+def detect_objects(image):
+    # Preprocesar la imagen
+    (h, w) = image.shape[:2]
+    blob = cv2.dnn.blobFromImage(cv2.resize(image, (300, 300)), 0.007843, (300, 300), 127.5)
+    net.setInput(blob)
+    detections = net.forward()
+
+    contaminantes = []
+    # Iterar sobre las detecciones
+    for i in range(detections.shape[2]):
+        confidence = detections[0, 0, i, 2]
+
+        # Filtrar detecciones con un umbral de confianza bajo para visualizar más resultados, por ejemplo 0.1
+        if confidence > 0.1:
+            idx = int(detections[0, 0, i, 1])
+            label = classes[idx]
+
+            # Añadir todas las etiquetas detectadas, no solo "bottle"
+            contaminantes.append(label)
+
+            # Dibujar un rectángulo alrededor del objeto detectado
+            box = detections[0, 0, i, 3:7] * np.array([w, h, w, h])
+            (startX, startY, endX, endY) = box.astype("int")
+            cv2.rectangle(image, (startX, startY), (endX, endY), (0, 255, 0), 2)
+            text = f"{label}: {confidence:.2f}"
+            cv2.putText(image, text, (startX, startY - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
+
+    return contaminantes
+
+
 
 if __name__ == '__main__':
     app.run(debug=True)

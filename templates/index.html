@@ -99,17 +99,26 @@
         </form>
 
         <div class="results">
-            {% if images_data %}
+            {% if images_data and images_data|length > 0 %}
                 {% for data in images_data %}
                     <div class="result-item">
                         <h3>Turbidez: {{ data.turbidity_level }}</h3>
                         <img src="data:image/jpeg;base64,{{ data.img_data }}" alt="Imagen de agua" style="max-width: 100%; height: auto;">
                         <div class="color-block" style="background-color: rgb({{ data.average_color[0] }}, {{ data.average_color[1] }}, {{ data.average_color[2] }});"></div>
                         <p>Color promedio (RGB): ({{ data.average_color[0] }}, {{ data.average_color[1] }}, {{ data.average_color[2] }})</p>
+                        
+                        {% if data.contaminantes and data.contaminantes|length > 0 %}
+                            <p>Contaminantes detectados: {{ data.contaminantes | join(', ') }}</p>
+                        {% else %}
+                            <p>No se detectaron contaminantes visuales.</p>
+                        {% endif %}
                     </div>
                 {% endfor %}
+            {% else %}
+                <p>No se encontraron imágenes para mostrar.</p>
             {% endif %}
         </div>
+        
     </div>
 </body>
 </html>
