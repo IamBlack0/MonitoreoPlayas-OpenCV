@@ -6,7 +6,6 @@ Este proyecto consiste en una aplicación web que permite a los usuarios subir i
 
 - Flask: Framework web para Python.
 - OpenCV: Biblioteca para procesamiento de imágenes.
-- TensorFlow: Biblioteca para aprendizaje automático.
 - HTML/CSS/JavaScript: Para el frontend.
 
 ## Instalación
@@ -15,9 +14,17 @@ Este proyecto consiste en una aplicación web que permite a los usuarios subir i
 2. Navega al directorio del proyecto.
 3. Instala las dependencias:
 
-   ```bash
+   ```bash 1
    python -m venv venv
    venv\Scripts\activate
    pip install -r requirements.txt
+   python app.py    
+
+   otra forma
+   pip install -r requirements.txt
+   python app.py    
+
+
+
 
 
