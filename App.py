@@ -2,6 +2,9 @@ from flask import Flask, request, render_template
 import cv2
 import numpy as np
 import base64
+import openpyxl
+from openpyxl import Workbook
+import os
 
 app = Flask(__name__)
 
@@ -14,6 +17,9 @@ net = cv2.dnn.readNetFromCaffe(prototxt_path, model_path)
 classes = ["background", "aeroplane", "bicycle", "bird", "boat", "bottle", "bus",
            "car", "cat", "chair", "cow", "diningtable", "dog", "horse", "motorbike",
            "person", "plant", "sheep", "sofa", "train", "tvmonitor"]
+
+# Ruta del archivo Excel
+excel_path = 'resultados_imagenes.xlsx'
 
 @app.route('/')
 def index():
@@ -45,6 +51,9 @@ def upload():
         # Detectar contaminantes visuales
         contaminantes_detectados = detect_objects(img)
 
+        # Guardar los resultados en el Excel
+        save_results_to_excel(average_color, turbidity_level, contaminantes_detectados)
+
         # Convertir la imagen a un formato que se puede mostrar en HTML
         _, buffer = cv2.imencode('.jpg', img)
         img_base64 = base64.b64encode(buffer).decode('utf-8')
@@ -58,6 +67,7 @@ def upload():
 
     return render_template('index.html', images_data=images_data)
 
+
 def get_average_color(image):
     # Convertir la imagen de BGR a RGB
     image_rgb = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
@@ -69,6 +79,7 @@ def get_average_color(image):
     average_color = np.clip(average_color, 0, 255)
     
     return tuple(average_color)
+
 
 def determine_turbidity_level(average_color):
     r, g, b = average_color
@@ -93,6 +104,7 @@ def determine_turbidity_level(average_color):
     
     return "Color fuera de rango"
 
+
 def detect_objects(image):
     # Preprocesar la imagen
     (h, w) = image.shape[:2]
@@ -110,7 +122,6 @@ def detect_objects(image):
             idx = int(detections[0, 0, i, 1])
             label = classes[idx]
 
-            # Añadir todas las etiquetas detectadas, no solo "bottle"
             contaminantes.append(label)
 
             # Dibujar un rectángulo alrededor del objeto detectado
@@ -123,6 +134,26 @@ def detect_objects(image):
     return contaminantes
 
 
+def save_results_to_excel(average_color, turbidity_level, contaminantes):
+    # Si el archivo no existe, crear uno nuevo
+    if not os.path.exists(excel_path):
+        workbook = Workbook()
+        sheet = workbook.active
+        # Crear encabezados
+        sheet.append(["Color promedio", "Nivel de turbidez", "Contaminantes detectados"])
+    else:
+        workbook = openpyxl.load_workbook(excel_path)
+        sheet = workbook.active
+
+    # Convertir lista de contaminantes a string
+    contaminantes_str = ', '.join(contaminantes) if contaminantes else "Ninguno"
+
+    # Agregar nueva fila con los datos
+    sheet.append([str(average_color), turbidity_level, contaminantes_str])
+
+    # Guardar el archivo Excel
+    workbook.save(excel_path)
+
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=True, port=5001)
