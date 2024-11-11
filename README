@@ -1,0 +1,10 @@
+# Sistema de Monitoreo de Playa IA
+
+## Instalación de Dependencias
+
+Para instalar las dependencias necesarias para ejecutar este proyecto, utiliza el archivo `requirements.txt`. Puedes instalar todas las dependencias ejecutando el siguiente comando:
+
+```sh
+pip install -r requirements.txt
+y luego python app.py
+tambien deben subir la base que esta en el archivo base.sql es para mysql
