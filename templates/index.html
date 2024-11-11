@@ -1,15 +1,124 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Beach Analysis</title>
+    <title>Análisis de Agua</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            background-color: #f4f4f4;
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 20px;
+        }
+
+        .container {
+            width: 90%;
+            max-width: 800px;
+            margin: 20px auto;
+            background: white;
+            border-radius: 5px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+        }
+
+        form {
+            display: flex;
+            flex-direction: column;
+        }
+
+        input[type="file"] {
+            margin-bottom: 10px;
+        }
+
+        button {
+            padding: 10px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        .results {
+            margin-top: 20px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            justify-content: center;
+        }
+
+        .result-item {
+            text-align: center;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 10px;
+            flex: 1 1 calc(45% - 20px); /* Flex para hacer que los elementos se ajusten */
+            background-color: #f9f9f9;
+            box-shadow: 0 1px 5px rgba(0, 0, 0, 0.1);
+            min-width: 200px; /* Ancho mínimo para los elementos */
+            max-width: 300px; /* Ancho máximo para los elementos */
+        }
+
+        .color-block {
+            width: 100%;
+            height: 50px;
+            margin: 10px 0;
+            border-radius: 3px;
+        }
+
+        @media (max-width: 600px) {
+            .result-item {
+                flex: 1 1 100%; /* En pantallas pequeñas, cada item ocupa el 100% */
+            }
+        }
+    </style>
 </head>
 <body>
-    <h1>Subir imagen de la playa</h1>
-    <form action="/upload" method="POST" enctype="multipart/form-data">
-        <input type="file" name="file">
-        <button type="submit">Subir y analizar</button>
-    </form>
+    <div class="container">
+        <h1>Análisis de Agua</h1>
+        <form action="/upload" method="post" enctype="multipart/form-data">
+            <input type="file" name="files" accept="image/*" multiple required>
+            <button type="submit">Subir Imágenes</button>
+        </form>
+
+        <div class="results">
+            {% if images_data and images_data|length > 0 %}
+                {% for data in images_data %}
+                    <div class="result-item">
+                        <h3>Turbidez: {{ data.turbidity_level }}</h3>
+                        <img src="data:image/jpeg;base64,{{ data.img_data }}" alt="Imagen de agua" style="max-width: 100%; height: auto;">
+                        <div class="color-block" style="background-color: rgb({{ data.average_color[0] }}, {{ data.average_color[1] }}, {{ data.average_color[2] }});"></div>
+                        <p>Color promedio (RGB): ({{ data.average_color[0] }}, {{ data.average_color[1] }}, {{ data.average_color[2] }})</p>
+                        
+                        {% if data.contaminantes and data.contaminantes|length > 0 %}
+                            <p>Contaminantes detectados: {{ data.contaminantes | join(', ') }}</p>
+                        {% else %}
+                            <p>No se detectaron contaminantes visuales.</p>
+                        {% endif %}
+                    </div>
+                {% endfor %}
+            {% else %}
+                <p>No se encontraron imágenes para mostrar.</p>
+            {% endif %}
+        </div>
+        
+    </div>
 </body>
 </html>
