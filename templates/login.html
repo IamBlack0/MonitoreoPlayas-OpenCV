@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Sistema de Monitoreo de Playa IA</title>
+    <!-- Agregar en el <head> después del título -->
+<link rel="icon" type="image/png" href="{{ url_for('static', filename='icons/favicon.png') }}">
+<!-- También agregar versiones alternativas para diferentes dispositivos -->
+<link rel="apple-touch-icon" sizes="180x180" href="{{ url_for('static', filename='icons/apple-touch-icon.png') }}">
+<link rel="icon" type="image/png" sizes="32x32" href="{{ url_for('static', filename='icons/favicon-32x32.png') }}">
+<link rel="icon" type="image/png" sizes="16x16" href="{{ url_for('static', filename='icons/favicon-16x16.png') }}">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'ocean': '#0077be',
+                        'sand': '#f4e4c1',
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-gradient-to-r from-blue-400 to-cyan-300 min-h-screen flex items-center justify-center p-4">
+    <div class="bg-white bg-opacity-80 p-8 rounded-lg shadow-lg w-full max-w-md backdrop-blur-sm">
+        <div class="flex justify-center mb-6">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 text-ocean" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
+            </svg>
+        </div>
+        <h2 class="text-3xl font-bold mb-6 text-center text-ocean">
+            Monitoreo de Playa IA
+        </h2>
+        
+        {% if error %}
+        <div class="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded">
+            {{ error }}
+        </div>
+        {% endif %}
+
+        <form action="{{ url_for('login') }}" method="post">
+            <div class="mb-4">
+                <label for="username" class="block text-ocean text-sm font-bold mb-2">Usuario:</label>
+                <input type="text" 
+                       id="username" 
+                       name="username" 
+                       required
+                       class="w-full px-3 py-2 border border-blue-300 rounded-md focus:outline-none focus:ring focus:border-ocean bg-white bg-opacity-50">
+            </div>
+            
+            <div class="mb-6">
+                <label for="password" class="block text-ocean text-sm font-bold mb-2">Contraseña:</label>
+                <input type="password" 
+                       id="password" 
+                       name="password" 
+                       required
+                       class="w-full px-3 py-2 border border-blue-300 rounded-md focus:outline-none focus:ring focus:border-ocean bg-white bg-opacity-50">
+            </div>
+            
+            <button type="submit"
+                    class="w-full bg-ocean text-white font-bold py-3 px-4 rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 transition duration-300 shadow-md">
+                Iniciar Sesión
+            </button>
+        </form>
+        
+        <p class="mt-6 text-center text-sm text-gray-600">
+            ¿No tienes cuenta? 
+            <a href="{{ url_for('register') }}" class="text-ocean hover:text-blue-700 font-semibold transition duration-300">
+                Regístrate
+            </a>
+        </p>
+    </div>
+</body>
+</html>

@@ -1,15 +1,442 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
+
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Beach Analysis</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Inicio - Sistema de Monitoreo de Playa IA</title>
+
+  <link rel="icon" type="image/png" href="{{ url_for('static', filename='icons/favicon.png') }}" />
+  <link rel="apple-touch-icon" sizes="180x180" href="{{ url_for('static', filename='icons/apple-touch-icon.png') }}" />
+  <link rel="icon" type="image/png" sizes="32x32" href="{{ url_for('static', filename='icons/favicon-32x32.png') }}" />
+  <link rel="icon" type="image/png" sizes="16x16" href="{{ url_for('static', filename='icons/favicon-16x16.png') }}" />
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            ocean: "#0077be",
+            sand: "#f4e4c1",
+          },
+        },
+      },
+    };
+  </script>
 </head>
-<body>
-    <h1>Subir imagen de la playa</h1>
-    <form action="/upload" method="POST" enctype="multipart/form-data">
-        <input type="file" name="file">
-        <button type="submit">Subir y analizar</button>
-    </form>
+
+<body class="bg-gradient-to-r from-blue-400 to-cyan-300 min-h-screen flex flex-col">
+  <!-- Barra de navegación -->
+  <nav class="bg-ocean p-4 fixed w-full z-50">
+    <div class="container mx-auto flex items-center justify-between">
+      <a href="{{ url_for('home') }}" class="text-white text-xl font-bold flex items-center">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 mr-2" fill="none" viewBox="0 0 24 24"
+          stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
+        </svg>
+        AquaSense
+      </a>
+
+      <!-- Menú Desktop -->
+      <div class="hidden md:flex items-center space-x-6">
+        <a href="{{ url_for('home') }}"
+          class="text-white hover:text-sand transition duration-300 font-medium">Inicio</a>
+        <a href="{{ url_for('index') }}" class="text-white hover:text-sand transition duration-300 font-medium">Subir
+          Imagen</a>
+        <a href="{{ url_for('dashboard') }}"
+          class="text-white hover:text-sand transition duration-300 font-medium">Estadística</a>
+      </div>
+      <a href="{{ url_for('logout') }}" class="hidden md:block text-white hover:text-sand transition duration-300 p-2">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+        </svg>
+      </a>
+
+      <!-- Botón menú móvil -->
+      <button id="mobile-menu-button" class="md:hidden text-white p-2">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+        </svg>
+      </button>
+    </div>
+
+    <!-- Menú móvil desplegable -->
+    <div id="mobile-menu" class="hidden md:hidden bg-ocean absolute w-full left-0 mt-4 py-2 px-4">
+      <a href="{{ url_for('home') }}" class="block text-white hover:text-sand py-2">Inicio</a>
+      <a href="{{ url_for('index') }}" class="block text-white hover:text-sand py-2">Subir Imagen</a>
+      <a href="{{ url_for('dashboard') }}" class="block text-white hover:text-sand py-2">Estadística</a>
+      <a href="{{ url_for('logout') }}" class="block text-white hover:text-sand py-2">Cerrar Sesión</a>
+    </div>
+  </nav>
+
+  <!-- Hero Section -->
+  <section class="relative pt-16">
+    <div class="absolute inset-0 z-0">
+      <img src="https://www.voltranc.com/wp-content/uploads/2024/06/Recoleccion-de-basura-en-playas-de-Panama.jpg"
+        alt="Beach Cleanup" class="w-full h-full object-cover" />
+      <div class="absolute inset-0 bg-black opacity-50"></div>
+    </div>
+    <div class="container mx-auto px-4 py-32 relative z-10">
+      <h1 class="text-4xl md:text-5xl font-bold text-white mb-4">
+        Sistema de Monitoreo de Playa con IA
+      </h1>
+      <p class="text-xl text-white mb-8">
+        Protegiendo nuestras playas con tecnología avanzada
+      </p>
+      <a href="{{ url_for('index') }}"
+        class="bg-ocean hover:bg-blue-600 text-white font-bold py-2 px-4 rounded transition duration-300">
+        Subir Imagen
+      </a>
+    </div>
+  </section>
+
+  <!-- About Us Section with Carousel -->
+
+  <section class="py-16 bg-white bg-opacity-80 backdrop-blur-sm">
+    <div class="container mx-auto px-4">
+      <h2 class="text-3xl font-bold text-ocean mb-12 text-center">
+        Sobre Nosotros
+      </h2>
+
+      <div class="carousel-container relative overflow-hidden">
+        <div class="carousel-inner flex transition-transform duration-500 ease-in-out gap-6">
+          <!-- Tarjeta 1 -->
+          <div
+            class="carousel-item min-w-full md:min-w-[calc(33.333%-1rem)] bg-white rounded-xl shadow-lg overflow-hidden">
+            <img src="https://img.freepik.com/fotos-premium/contaminacion-basura-botella-plastico-playa_42667-299.jpg"
+              alt="Contaminación en Playas" class="w-full h-48 object-cover" />
+            <div class="p-6">
+              <h3 class="text-xl font-semibold text-ocean mb-3">
+                Detección de Contaminación
+              </h3>
+              <p class="text-gray-600">
+                Utilizamos tecnología de punta para identificar y monitorear
+                diferentes tipos de contaminación en nuestras playas,
+                permitiendo una respuesta rápida y efectiva.
+              </p>
+            </div>
+          </div>
+
+          <!-- Tarjeta 2 -->
+          <div
+            class="carousel-item min-w-full md:min-w-[calc(33.333%-1rem)] bg-white rounded-xl shadow-lg overflow-hidden">
+            <img src="https://img.freepik.com/fotos-premium/botella-agua-esta-playa-junto-basura_548729-14013.jpg"
+              alt="Análisis de Agua" class="w-full h-48 object-cover" />
+            <div class="p-6">
+              <h3 class="text-xl font-semibold text-ocean mb-3">
+                Análisis de Calidad del Agua
+              </h3>
+              <p class="text-gray-600">
+                Nuestro sistema analiza constantemente la calidad del agua,
+                monitoreando niveles de turbidez y otros indicadores
+                importantes para la salud del ecosistema marino.
+              </p>
+            </div>
+          </div>
+
+          <!-- Tarjeta 3 -->
+          <div
+            class="carousel-item min-w-full md:min-w-[calc(33.333%-1rem)] bg-white rounded-xl shadow-lg overflow-hidden">
+            <img
+              src="https://www.latercera.com/resizer/Yve0ynQ0kBYJXSIJE-FFcVo_jfc=/arc-anglerfish-arc2-prod-copesa/public/HNK5AFZ55JA35CCO7W7MV6YIPA.jpg"
+              alt="Limpieza de Playas" class="w-full h-48 object-cover" />
+            <div class="p-6">
+              <h3 class="text-xl font-semibold text-ocean mb-3">
+                Gestión y Limpieza
+              </h3>
+              <p class="text-gray-600">
+                Coordinamos esfuerzos de limpieza basados en datos reales,
+                optimizando recursos y maximizando el impacto de nuestras
+                intervenciones.
+              </p>
+            </div>
+          </div>
+          <!-- Tarjeta 4 -->
+          <div
+            class="carousel-item min-w-full md:min-w-[calc(33.333%-1rem)] bg-white rounded-xl shadow-lg overflow-hidden">
+            <img
+              src="https://www.latercera.com/resizer/Yve0ynQ0kBYJXSIJE-FFcVo_jfc=/arc-anglerfish-arc2-prod-copesa/public/HNK5AFZ55JA35CCO7W7MV6YIPA.jpg"
+              alt="Limpieza de Playas" class="w-full h-48 object-cover" />
+            <div class="p-6">
+              <h3 class="text-xl font-semibold text-ocean mb-3">
+                Gestión y Limpieza
+              </h3>
+              <p class="text-gray-600">
+                Coordinamos esfuerzos de limpieza basados en datos reales,
+                optimizando recursos y maximizando el impacto de nuestras
+                intervenciones.
+              </p>
+            </div>
+          </div>
+          <!-- Tarjeta 5 -->
+          <div
+            class="carousel-item min-w-full md:min-w-[calc(33.333%-1rem)] bg-white rounded-xl shadow-lg overflow-hidden">
+            <img
+              src="https://www.latercera.com/resizer/Yve0ynQ0kBYJXSIJE-FFcVo_jfc=/arc-anglerfish-arc2-prod-copesa/public/HNK5AFZ55JA35CCO7W7MV6YIPA.jpg"
+              alt="Limpieza de Playas" class="w-full h-48 object-cover" />
+            <div class="p-6">
+              <h3 class="text-xl font-semibold text-ocean mb-3">
+                Gestión y Limpieza
+              </h3>
+              <p class="text-gray-600">
+                Coordinamos esfuerzos de limpieza basados en datos reales,
+                optimizando recursos y maximizando el impacto de nuestras
+                intervenciones.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Controles del carrusel -->
+        <button
+          class="carousel-control prev absolute top-1/2 -left-4 transform -translate-y-1/2 bg-white rounded-full p-2 shadow-lg hover:bg-gray-100 transition duration-300">
+          <svg class="w-6 h-6 text-ocean" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+          </svg>
+        </button>
+        <button
+          class="carousel-control next absolute top-1/2 -right-4 transform -translate-y-1/2 bg-white rounded-full p-2 shadow-lg hover:bg-gray-100 transition duration-300">
+          <svg class="w-6 h-6 text-ocean" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Reports Section -->
+  <section class="py-16 bg-gray-100">
+    <div class="container mx-auto px-4">
+      <h2 class="text-3xl font-bold text-ocean mb-8 text-center">Informes</h2>
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        <!-- Tarjeta de calidad de agua -->
+        <a href="https://www.ghid.gov/files/ec2787311/Granger-Hunter-WQR-2024-RD_ES.pdf"
+          class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition duration-300 group flex gap-4"
+          target="_blank">
+          <!-- Imagen miniatura -->
+          <div class="flex-shrink-0">
+            <img src="https://i.ibb.co/ZKfwhyJ/agua.png" alt="Calidad del Agua"
+              class="w-16 h-16 rounded-lg object-cover" />
+          </div>
+          <!-- Contenido -->
+          <div class="flex-grow">
+            <div class="flex items-center justify-between mb-2">
+              <h3 class="text-xl font-semibold text-ocean">
+                Calidad del Agua
+              </h3>
+              <svg class="w-6 h-6 text-red-500 group-hover:scale-110 transition-transform" fill="none"
+                viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+              </svg>
+            </div>
+            <p class="text-gray-600">
+              Informe sobre el mantenimiento y calidad del agua en nuestras
+              playas.
+            </p>
+          </div>
+        </a>
+
+        <!-- Tarjeta de Limpieza de Playas -->
+        <a href="https://www.ambiente.gub.uy/oan/documentos/DCA_Informe-monitoreo-calidad-de-playas-2022-2023.pdf"
+          class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition duration-300 group flex gap-4"
+          target="_blank">
+          <!-- Imagen miniatura -->
+          <div class="flex-shrink-0">
+            <img src="https://i.ibb.co/CVbP5Nv/playa.png" alt="Limpieza de Playas"
+              class="w-16 h-16 rounded-lg object-cover" />
+          </div>
+          <!-- Contenido -->
+          <div class="flex-grow">
+            <div class="flex items-center justify-between mb-2">
+              <h3 class="text-xl font-semibold text-ocean">
+                Limpieza de Playas
+              </h3>
+              <svg class="w-6 h-6 text-red-500 group-hover:scale-110 transition-transform" fill="none"
+                viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+              </svg>
+            </div>
+            <p class="text-gray-600">
+              Estrategias y resultados de nuestras campañas de limpieza.
+            </p>
+          </div>
+        </a>
+
+        <!-- Tarjeta de Monitoreo con IA -->
+        <a href="{{ url_for('static', filename='reports/ai-monitoring.pdf') }}"
+          class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition duration-300 group flex gap-4"
+          target="_blank">
+          <!-- Imagen miniatura -->
+          <div class="flex-shrink-0">
+            <img src="https://i.ibb.co/FXKmDGQ/ia.png" alt="Monitoreo con IA"
+              class="w-16 h-16 rounded-lg object-cover" />
+          </div>
+          <!-- Contenido -->
+          <div class="flex-grow">
+            <div class="flex items-center justify-between mb-2">
+              <h3 class="text-xl font-semibold text-ocean">
+                Monitoreo con IA
+              </h3>
+              <svg class="w-6 h-6 text-red-500 group-hover:scale-110 transition-transform" fill="none"
+                viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+              </svg>
+            </div>
+            <p class="text-gray-600">
+              Cómo utilizamos la inteligencia artificial para proteger
+              nuestras playas.
+            </p>
+          </div>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Team Section -->
+  <section class="py-16 bg-white bg-opacity-80 backdrop-blur-sm">
+    <div class="container mx-auto px-4">
+      <h2 class="text-3xl font-bold text-ocean mb-8 text-center">
+        Nuestro Equipo
+      </h2>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <div class="text-center">
+          <img src="https://i.ibb.co/QbXBSNh/Dise-o-sin-t-tulo-5.png" alt="Ruben Rivera"
+            class="w-48 h-48 rounded-full mx-auto mb-4 object-cover" />
+          <h3 class="text-xl font-semibold text-ocean">Ruben Rivera</h3>
+          <p class="text-gray-600"></p>
+        </div>
+        <div class="text-center">
+          <img src="https://i.ibb.co/NKNSTMg/Dise-o-sin-t-tulo-4.png" alt="Michael Aparicio"
+            class="w-48 h-48 rounded-full mx-auto mb-4 object-cover" />
+          <h3 class="text-xl font-semibold text-ocean">Michael Aparicio</h3>
+          <p class="text-gray-600"></p>
+        </div>
+        <div class="text-center">
+          <img src="https://i.ibb.co/FW07gs3/Dise-o-sin-t-tulo-3.png" alt="Henry Maldonado"
+            class="w-48 h-48 rounded-full mx-auto mb-4 object-cover" />
+          <h3 class="text-xl font-semibold text-ocean">Henry Maldonado</h3>
+          <p class="text-gray-600"></p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer class="bg-ocean text-white py-8">
+    <div class="container mx-auto px-4">
+      <div class="flex flex-col md:flex-row justify-between items-center">
+        <div class="mb-4 md:mb-0">
+          <h3 class="text-lg font-semibold mb-2">Desarrolladores:</h3>
+          <ul class="space-y-1">
+            <li>Ruben Rivera</li>
+            <li>Michael Aparicio</li>
+            <li>Henry Maldonado</li>
+          </ul>
+        </div>
+        <div class="text-center md:text-right">
+          <p class="text-sand">
+            © <span id="year"></span> Sistema de Monitoreo de Playa IA
+          </p>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Actualizar el script del carrusel -->
+  <script>
+    const carousel = document.querySelector(".carousel-inner");
+    const items = carousel.querySelectorAll(".carousel-item");
+    const prevBtn = document.querySelector(".carousel-control.prev");
+    const nextBtn = document.querySelector(".carousel-control.next");
+    let currentIndex = 0;
+    const totalItems = items.length;
+    const visibleSlides = 3; // Número de slides visibles a la vez
+
+    function showSlide(index) {
+      // Calcular el ancho total y el offset
+      const isMobile = window.innerWidth < 768;
+      const slideWidth = isMobile ? 100 : 100 / visibleSlides;
+      const maxOffset = isMobile
+        ? totalItems - 1
+        : totalItems - visibleSlides;
+
+      // Asegurarse de que el índice no exceda el máximo permitido
+      if (index > maxOffset) {
+        currentIndex = 0;
+        index = 0;
+      } else if (index < 0) {
+        currentIndex = maxOffset;
+        index = maxOffset;
+      }
+
+      // Aplicar la transformación
+      const offset = index * slideWidth;
+      carousel.style.transform = `translateX(-${offset}%)`;
+    }
+
+    prevBtn.addEventListener("click", () => {
+      currentIndex--;
+      showSlide(currentIndex);
+    });
+
+    nextBtn.addEventListener("click", () => {
+      currentIndex++;
+      showSlide(currentIndex);
+    });
+
+    // Auto-rotate con límites
+    let autoRotate = setInterval(() => {
+      currentIndex++;
+      showSlide(currentIndex);
+    }, 5000);
+
+    // Pausar auto-rotación al hover
+    carousel.parentElement.addEventListener("mouseenter", () => {
+      clearInterval(autoRotate);
+    });
+
+    carousel.parentElement.addEventListener("mouseleave", () => {
+      autoRotate = setInterval(() => {
+        currentIndex++;
+        showSlide(currentIndex);
+      }, 5000);
+    });
+
+    // Ajustar al cambiar el tamaño de la ventana
+    window.addEventListener("resize", () => {
+      showSlide(currentIndex);
+    });
+
+    // Inicializar
+    showSlide(0);
+  </script>
+  <script>
+    const mobileMenuButton = document.getElementById('mobile-menu-button');
+    const mobileMenu = document.getElementById('mobile-menu');
+
+    mobileMenuButton.addEventListener('click', () => {
+      mobileMenu.classList.toggle('hidden');
+    });
+
+    // Cerrar menú al hacer clic fuera
+    document.addEventListener('click', (e) => {
+      if (!mobileMenu.contains(e.target) && !mobileMenuButton.contains(e.target)) {
+        mobileMenu.classList.add('hidden');
+      }
+    });
+
+    // Cerrar menú al cambiar tamaño de ventana
+    window.addEventListener('resize', () => {
+      if (window.innerWidth >= 768) {
+        mobileMenu.classList.add('hidden');
+      }
+    });
+  </script>
 </body>
+
 </html>

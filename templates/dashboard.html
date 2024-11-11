@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard de Monitoreo - Sistema de Monitoreo de Playa IA</title>
+    <!-- Agregar en el <head> después del título -->
+<link rel="icon" type="image/png" href="{{ url_for('static', filename='icons/favicon.png') }}">
+<!-- También agregar versiones alternativas para diferentes dispositivos -->
+<link rel="apple-touch-icon" sizes="180x180" href="{{ url_for('static', filename='icons/apple-touch-icon.png') }}">
+<link rel="icon" type="image/png" sizes="32x32" href="{{ url_for('static', filename='icons/favicon-32x32.png') }}">
+<link rel="icon" type="image/png" sizes="16x16" href="{{ url_for('static', filename='icons/favicon-16x16.png') }}">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'ocean': '#0077be',
+                        'sand': '#f4e4c1',
+                    }
+                }
+            }
+        }
+    </script>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+</head>
+<body class="bg-gradient-to-r from-blue-400 to-cyan-300 min-h-screen flex flex-col">
+    <!-- Barra de navegación -->
+<nav class="bg-ocean p-4 fixed w-full z-50">
+    <div class="container mx-auto flex items-center justify-between">
+        <a href="{{ url_for('home') }}" class="text-white text-xl font-bold flex items-center">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 mr-2" fill="none" viewBox="0 0 24 24"
+                stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
+            </svg>
+            AquaSense
+        </a>
+
+        <!-- Menú Desktop -->
+        <div class="hidden md:flex items-center space-x-6">
+            <a href="{{ url_for('home') }}"
+                class="text-white hover:text-sand transition duration-300 font-medium">Inicio</a>
+            <a href="{{ url_for('index') }}"
+                class="text-white hover:text-sand transition duration-300 font-medium">Subir Imagen</a>
+            <a href="{{ url_for('dashboard') }}"
+                class="text-white hover:text-sand transition duration-300 font-medium">Estadística</a>
+        </div>
+        <a href="{{ url_for('logout') }}"
+            class="hidden md:block text-white hover:text-sand transition duration-300 p-2">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
+                stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+            </svg>
+        </a>
+
+        <!-- Botón menú móvil -->
+        <button id="mobile-menu-button" class="md:hidden text-white p-2">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
+                stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+            </svg>
+        </button>
+    </div>
+
+    <!-- Menú móvil desplegable -->
+    <div id="mobile-menu" class="hidden md:hidden bg-ocean absolute w-full left-0 mt-4 py-2 px-4">
+        <a href="{{ url_for('home') }}" class="block text-white hover:text-sand py-2">Inicio</a>
+        <a href="{{ url_for('index') }}" class="block text-white hover:text-sand py-2">Subir Imagen</a>
+        <a href="{{ url_for('dashboard') }}" class="block text-white hover:text-sand py-2">Estadística</a>
+        <a href="{{ url_for('logout') }}" class="block text-white hover:text-sand py-2">Cerrar Sesión</a>
+    </div>
+</nav>
+
+    <div class="container mx-auto px-4 pt-24 pb-8">
+        <h1 class="text-3xl font-bold text-center mb-8 text-white">Estadísticas Generales de Todas las Playas</h1>
+        
+        <div class="grid gap-8">
+            <div class="bg-white bg-opacity-80 shadow-lg rounded-lg p-6 backdrop-blur-sm">
+                <h2 class="text-xl font-semibold mb-4 text-ocean">Niveles de Turbidez en el Tiempo</h2>
+                <div id="turbidity-chart" class="w-full h-[400px]"></div>
+            </div>
+            
+            <div class="bg-white bg-opacity-80 shadow-lg rounded-lg p-6 backdrop-blur-sm">
+                <h2 class="text-xl font-semibold mb-4 text-ocean">Distribución de Tipos de Basura</h2>
+                <div id="trash-distribution" class="w-full h-[400px]"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-ocean text-white py-8 mt-auto">
+        <div class="container mx-auto px-4">
+            <div class="flex flex-col md:flex-row justify-between items-center">
+                <div class="mb-4 md:mb-0">
+                    <h3 class="text-lg font-semibold mb-2">Desarrolladores:</h3>
+                    <ul class="space-y-1">
+                        <li>Ruben Rivera</li>
+                        <li>Michael Aparicio</li>
+                        <li>Henry Maldonado</li>
+                    </ul>
+                </div>
+                <div class="text-center md:text-right">
+                    <p class="text-sand">© <span id="year"></span> Sistema de Monitoreo de Playa IA</p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Actualizar el año en el footer
+        document.getElementById('year').textContent = new Date().getFullYear();
+
+        // Script para las gráficas
+        try {
+            const turbidityData = JSON.parse('{{ turbidity_chart | safe }}');
+            const trashData = JSON.parse('{{ trash_dist | safe }}');
+            
+            if (turbidityData && Object.keys(turbidityData).length > 0) {
+                Plotly.newPlot('turbidity-chart', turbidityData.data, {
+                    ...turbidityData.layout,
+                    paper_bgcolor: 'rgba(255, 255, 255, 0.5)',
+                    plot_bgcolor: 'rgba(255, 255, 255, 0.5)',
+                    margin: { t: 10, r: 10, b: 50, l: 50 },
+                    font: { color: '#0077be' }
+                });
+            } else {
+                document.getElementById('turbidity-chart').innerHTML = 
+                    '<div class="flex items-center justify-center h-full text-ocean">No hay datos de turbidez disponibles</div>';
+            }
+            
+            if (trashData && Object.keys(trashData).length > 0) {
+                Plotly.newPlot('trash-distribution', trashData.data, {
+                    ...trashData.layout,
+                    paper_bgcolor: 'rgba(255, 255, 255, 0.5)',
+                    plot_bgcolor: 'rgba(255, 255, 255, 0.5)',
+                    margin: { t: 10, r: 10, b: 50, l: 50 },
+                    font: { color: '#0077be' }
+                });
+            } else {
+                document.getElementById('trash-distribution').innerHTML = 
+                    '<div class="flex items-center justify-center h-full text-ocean">No hay datos de basura disponibles</div>';
+            }
+        } catch (error) {
+            console.error('Error al cargar las gráficas:', error);
+            document.querySelectorAll('[id$="-chart"]').forEach(container => {
+                container.innerHTML = 
+                    `<div class="flex items-center justify-center h-full text-red-500">Error al cargar la gráfica: ${error.message}</div>`;
+            });
+        }
+    </script>
+    <script>
+        const mobileMenuButton = document.getElementById('mobile-menu-button');
+        const mobileMenu = document.getElementById('mobile-menu');
+
+        mobileMenuButton.addEventListener('click', () => {
+            mobileMenu.classList.toggle('hidden');
+        });
+
+        // Cerrar menú al hacer clic fuera
+        document.addEventListener('click', (e) => {
+            if (!mobileMenu.contains(e.target) && !mobileMenuButton.contains(e.target)) {
+                mobileMenu.classList.add('hidden');
+            }
+        });
+
+        // Cerrar menú al cambiar tamaño de ventana
+        window.addEventListener('resize', () => {
+            if (window.innerWidth >= 768) {
+                mobileMenu.classList.add('hidden');
+            }
+        });
+    </script>
+</body>
+</html>

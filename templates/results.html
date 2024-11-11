@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Resultados - Detección de Contaminación</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'ocean': '#0077be',
+                        'sand': '#f4e4c1',
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <!-- Mapbox GL JS -->
+    <script src='https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.js'></script>
+    <link href='https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.css' rel='stylesheet' />
+</head>
+<body class="bg-gradient-to-r from-blue-400 to-cyan-300 min-h-screen flex flex-col">
+    <!-- Barra de navegación -->
+    <nav class="bg-ocean p-4 fixed w-full z-50">
+        <div class="container mx-auto flex items-center justify-between">
+            <a href="{{ url_for('home') }}" class="text-white text-xl font-bold flex items-center">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 mr-2" fill="none" viewBox="0 0 24 24"
+                    stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
+                </svg>
+                AquaSense
+            </a>
+    
+            <!-- Menú Desktop -->
+            <div class="hidden md:flex items-center space-x-6">
+                <a href="{{ url_for('home') }}"
+                    class="text-white hover:text-sand transition duration-300 font-medium">Inicio</a>
+                <a href="{{ url_for('index') }}"
+                    class="text-white hover:text-sand transition duration-300 font-medium">Subir Imagen</a>
+                <a href="{{ url_for('dashboard') }}"
+                    class="text-white hover:text-sand transition duration-300 font-medium">Estadística</a>
+            </div>
+            <a href="{{ url_for('logout') }}"
+                class="hidden md:block text-white hover:text-sand transition duration-300 p-2">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
+                    stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                </svg>
+            </a>
+    
+            <!-- Botón menú móvil -->
+            <button id="mobile-menu-button" class="md:hidden text-white p-2">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
+                    stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                </svg>
+            </button>
+        </div>
+    
+        <!-- Menú móvil desplegable -->
+        <div id="mobile-menu" class="hidden md:hidden bg-ocean absolute w-full left-0 mt-4 py-2 px-4">
+            <a href="{{ url_for('home') }}" class="block text-white hover:text-sand py-2">Inicio</a>
+            <a href="{{ url_for('index') }}" class="block text-white hover:text-sand py-2">Subir Imagen</a>
+            <a href="{{ url_for('dashboard') }}" class="block text-white hover:text-sand py-2">Estadística</a>
+            <a href="{{ url_for('logout') }}" class="block text-white hover:text-sand py-2">Cerrar Sesión</a>
+        </div>
+    </nav>
+
+    <div class="container mx-auto px-4 pt-24 pb-8">
+        <h1 class="text-3xl font-bold text-center mb-8 text-white">Resultados del Análisis</h1>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+            <div class="bg-white bg-opacity-80 rounded-lg shadow-lg p-6 backdrop-blur-sm">
+                <h3 class="text-xl font-semibold mb-4 text-ocean">Imagen Original</h3>
+                <img src="{{ url_for('static', filename=input_image) }}" 
+                     alt="Imagen Original"
+                     class="w-full rounded-lg">
+            </div>
+            <div class="bg-white bg-opacity-80 rounded-lg shadow-lg p-6 backdrop-blur-sm">
+                <h3 class="text-xl font-semibold mb-4 text-ocean">Resultado de la Detección</h3>
+                <img src="{{ url_for('serve_result', filename=result_image) }}" 
+                     alt="Resultado de Detección"
+                     class="w-full rounded-lg">
+            </div>
+        </div>
+
+        {% if segmentation_info %}
+        <div class="bg-white bg-opacity-80 rounded-lg shadow-lg p-6 mb-6 backdrop-blur-sm">
+            <h3 class="text-xl font-semibold mb-4 text-ocean">Información de Segmentación</h3>
+            <div class="grid gap-4">
+                {% for item in segmentation_info %}
+                <div class="bg-white bg-opacity-50 p-4 rounded-lg border-l-4 border-ocean">
+                    <p class="text-gray-700">
+                        <span class="font-semibold">Clase:</span> {{ item.class }}
+                        <span class="font-semibold ml-4">Confianza:</span> {{ item.confidence }}
+                    </p>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+
+        {% if turbidez_info %}
+        <div class="bg-white bg-opacity-80 rounded-lg shadow-lg p-6 mb-6 backdrop-blur-sm">
+            <h3 class="text-xl font-semibold mb-4 text-ocean">Información de Turbidez</h3>
+            <div class="grid gap-4">
+                {% for item in turbidez_info %}
+                <div class="bg-white bg-opacity-50 p-4 rounded-lg border-l-4 border-ocean">
+                    <p class="text-gray-700 mb-2">
+                        <span class="font-semibold">Clase:</span> {{ item.class }}
+                        <span class="font-semibold ml-4">Confianza:</span> {{ item.confidence }}
+                    </p>
+                    <img src="{{ url_for('serve_crop', filename=item.crop) }}" 
+                         alt="Recorte de Mar"
+                         class="max-w-md rounded-lg mx-auto">
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+
+        {% if basura_info %}
+        <div class="bg-white bg-opacity-80 rounded-lg shadow-lg p-6 mb-6 backdrop-blur-sm">
+            <h3 class="text-xl font-semibold mb-4 text-ocean">Detección de Basura</h3>
+            {% if basura_image %}
+            <div class="mb-4">
+                <img src="{{ url_for('serve_result', filename=basura_image) }}" 
+                     alt="Detecciones de Basura"
+                     class="w-full rounded-lg">
+            </div>
+            {% endif %}
+            <div class="grid gap-4">
+                {% for item in basura_info %}
+                <div class="bg-white bg-opacity-50 p-4 rounded-lg border-l-4 border-red-500">
+                    <p class="text-gray-700">
+                        <span class="font-semibold">Tipo de Basura:</span> {{ item.class }}
+                        <span class="font-semibold ml-4">Confianza:</span> {{ item.confidence }}
+                    </p>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Mapa de ubicaciones -->
+        <div class="bg-white bg-opacity-80 rounded-lg shadow-lg p-6 mb-6 backdrop-blur-sm">
+            <h3 class="text-xl font-semibold mb-4 text-ocean">Mapa de Ubicaciones</h3>
+            <div id="map" class="w-full h-96 rounded-lg"></div>
+        </div>
+    </div>
+
+    <footer class="bg-ocean text-white py-8 mt-auto">
+        <div class="container mx-auto px-4">
+            <div class="flex flex-col md:flex-row justify-between items-center">
+                <div class="mb-4 md:mb-0">
+                    <h3 class="text-lg font-semibold mb-2">Desarrolladores:</h3>
+                    <ul class="space-y-1">
+                        <li>Ruben Rivera</li>
+                        <li>Michael Aparicio</li>
+                        <li>Henry Maldonado</li>
+                    </ul>
+                </div>
+                <div class="text-center md:text-right">
+                    <p class="text-sand">© <span id="year"></span> Sistema de Monitoreo de Playa IA</p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // El script del mapa se mantiene igual
+        mapboxgl.accessToken = 'pk.eyJ1IjoicnViZW5zb2Z0dyIsImEiOiJjbTM4MTB0ZWYwbXBtMmlwd3VzM3B6YzR1In0.kwgNmA9J9G3en0mo8zpo7Q';
+        
+        const map = new mapboxgl.Map({
+            container: 'map',
+            style: 'mapbox://styles/mapbox/streets-v11',
+            center: [-79.5167, 8.9833],
+            zoom: 7
+        });
+    
+        map.addControl(new mapboxgl.NavigationControl());
+    
+        {% if locations %}
+            const locations = {{ locations|tojson|safe }};
+            const bounds = new mapboxgl.LngLatBounds();
+    
+            locations.forEach(location => {
+                if (location.latitude && location.longitude) {
+                    const popup = new mapboxgl.Popup({ offset: 25 })
+                        .setHTML(`
+                            <strong>${location.location_name || 'Sin nombre'}</strong><br>
+                            Subido por: ${location.username}<br>
+                            Fecha: ${new Date(location.upload_date).toLocaleDateString()}
+                        `);
+    
+                    new mapboxgl.Marker()
+                        .setLngLat([location.longitude, location.latitude])
+                        .setPopup(popup)
+                        .addTo(map);
+    
+                    bounds.extend([location.longitude, location.latitude]);
+                }
+            });
+    
+            if (locations.length > 0) {
+                map.fitBounds(bounds, {
+                    padding: 50
+                });
+            }
+        {% endif %}
+    </script>
+    <script>
+        const mobileMenuButton = document.getElementById('mobile-menu-button');
+        const mobileMenu = document.getElementById('mobile-menu');
+
+        mobileMenuButton.addEventListener('click', () => {
+            mobileMenu.classList.toggle('hidden');
+        });
+
+        // Cerrar menú al hacer clic fuera
+        document.addEventListener('click', (e) => {
+            if (!mobileMenu.contains(e.target) && !mobileMenuButton.contains(e.target)) {
+                mobileMenu.classList.add('hidden');
+            }
+        });
+
+        // Cerrar menú al cambiar tamaño de ventana
+        window.addEventListener('resize', () => {
+            if (window.innerWidth >= 768) {
+                mobileMenu.classList.add('hidden');
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registro - Sistema de Monitoreo de Playa IA</title>
+    <!-- Agregar en el <head> después del título -->
+<link rel="icon" type="image/png" href="{{ url_for('static', filename='icons/favicon.png') }}">
+<!-- También agregar versiones alternativas para diferentes dispositivos -->
+<link rel="apple-touch-icon" sizes="180x180" href="{{ url_for('static', filename='icons/apple-touch-icon.png') }}">
+<link rel="icon" type="image/png" sizes="32x32" href="{{ url_for('static', filename='icons/favicon-32x32.png') }}">
+<link rel="icon" type="image/png" sizes="16x16" href="{{ url_for('static', filename='icons/favicon-16x16.png') }}">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'ocean': '#0077be',
+                        'sand': '#f4e4c1',
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-gradient-to-r from-blue-400 to-cyan-300 min-h-screen flex items-center justify-center p-4">
+    <div class="bg-white bg-opacity-80 p-8 rounded-lg shadow-lg w-full max-w-md backdrop-blur-sm">
+        <div class="flex justify-center mb-6">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 text-ocean" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
+            </svg>
+        </div>
+        <h2 class="text-3xl font-bold mb-6 text-center text-ocean">
+            Registro de Usuario
+        </h2>
+        
+        {% if error %}
+        <div class="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded" role="alert">
+            {{ error }}
+        </div>
+        {% endif %}
+
+        <form action="{{ url_for('register') }}" method="post">
+            <div class="mb-4">
+                <label for="username" class="block text-ocean text-sm font-bold mb-2">Usuario:</label>
+                <input type="text" 
+                       id="username" 
+                       name="username" 
+                       required
+                       class="w-full px-3 py-2 border border-blue-300 rounded-md focus:outline-none focus:ring focus:border-ocean bg-white bg-opacity-50"
+                       aria-describedby="username-description">
+                <p id="username-description" class="mt-1 text-xs text-gray-500">Elige un nombre de usuario único.</p>
+            </div>
+            
+            <div class="mb-4">
+                <label for="email" class="block text-ocean text-sm font-bold mb-2">Correo Electrónico:</label>
+                <input type="email" 
+                       id="email" 
+                       name="email" 
+                       required
+                       class="w-full px-3 py-2 border border-blue-300 rounded-md focus:outline-none focus:ring focus:border-ocean bg-white bg-opacity-50"
+                       placeholder="tu@ejemplo.com"
+                       aria-describedby="email-description">
+                <p id="email-description" class="mt-1 text-xs text-gray-500">Usaremos este correo para comunicarnos contigo.</p>
+            </div>
+            
+            <div class="mb-4">
+                <label for="password" class="block text-ocean text-sm font-bold mb-2">Contraseña:</label>
+                <input type="password" 
+                       id="password" 
+                       name="password" 
+                       required
+                       class="w-full px-3 py-2 border border-blue-300 rounded-md focus:outline-none focus:ring focus:border-ocean bg-white bg-opacity-50"
+                       aria-describedby="password-description">
+                <p id="password-description" class="mt-1 text-xs text-gray-500">Usa al menos 8 caracteres con letras y números.</p>
+            </div>
+            
+            <div class="mb-6">
+                <label for="confirm_password" class="block text-ocean text-sm font-bold mb-2">Confirmar Contraseña:</label>
+                <input type="password" 
+                       id="confirm_password" 
+                       name="confirm_password" 
+                       required
+                       class="w-full px-3 py-2 border border-blue-300 rounded-md focus:outline-none focus:ring focus:border-ocean bg-white bg-opacity-50"
+                       aria-describedby="confirm-password-description">
+                <p id="confirm-password-description" class="mt-1 text-xs text-gray-500">Vuelve a escribir tu contraseña para confirmar.</p>
+            </div>
+            
+            <button type="submit"
+                class="w-full bg-ocean text-white font-bold py-3 px-4 rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 transition duration-300 shadow-md">
+                Registrarse
+            </button>
+        </form>
+        
+        <p class="mt-6 text-center text-sm text-gray-600">
+            ¿Ya tienes una cuenta? 
+            <a href="{{ url_for('login') }}" class="text-ocean hover:text-blue-700 font-semibold transition duration-300">
+                Inicia Sesión
+            </a>
+        </p>
+    </div>
+
+
+    <!-- Agregar este script antes del cierre del body -->
+<script>
+    document.querySelector('form').addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const password = document.getElementById('password').value;
+        const confirmPassword = document.getElementById('confirm_password').value;
+        let isValid = true;
+        let errorMessage = '';
+
+        // Limpiar mensajes de error previos
+        document.querySelectorAll('.error-message').forEach(el => el.remove());
+
+        // Validar longitud de contraseña
+        if (password.length < 8) {
+            isValid = false;
+            showError('password', 'La contraseña debe tener al menos 8 caracteres');
+        }
+
+        // Validar que las contraseñas coincidan
+        if (password !== confirmPassword) {
+            isValid = false;
+            showError('confirm_password', 'Las contraseñas no coinciden');
+        }
+
+        if (isValid) {
+            this.submit();
+        }
+    });
+
+    // Función para mostrar mensajes de error
+    function showError(inputId, message) {
+        const input = document.getElementById(inputId);
+        const errorDiv = document.createElement('div');
+        errorDiv.className = 'error-message text-red-500 text-sm mt-1';
+        errorDiv.textContent = message;
+        input.parentNode.appendChild(errorDiv);
+        
+        // Cambiar el borde del input a rojo
+        input.classList.add('border-red-500');
+        
+        // Remover el borde rojo cuando el usuario empiece a escribir
+        input.addEventListener('input', function() {
+            this.classList.remove('border-red-500');
+            const errorMessage = this.parentNode.querySelector('.error-message');
+            if (errorMessage) {
+                errorMessage.remove();
+            }
+        });
+    }
+
+    // Validación en tiempo real de la longitud de la contraseña
+    document.getElementById('password').addEventListener('input', function() {
+        const passwordDescription = document.getElementById('password-description');
+        if (this.value.length < 8) {
+            passwordDescription.className = 'mt-1 text-xs text-red-500';
+        } else {
+            passwordDescription.className = 'mt-1 text-xs text-green-500';
+        }
+    });
+</script>
+
+<script>
+    async function checkAvailability(field, value) {
+        try {
+            const response = await fetch(`/check_availability?${field}=${encodeURIComponent(value)}`);
+            const data = await response.json();
+            return data.available;
+        } catch (error) {
+            console.error('Error al verificar disponibilidad:', error);
+            return false;
+        }
+    }
+
+    document.querySelector('form').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        
+        const username = document.getElementById('username').value;
+        const email = document.getElementById('email').value;
+        const password = document.getElementById('password').value;
+        const confirmPassword = document.getElementById('confirm_password').value;
+        let isValid = true;
+
+        // Validaciones
+        if (password !== confirmPassword) {
+            showError('confirm_password', 'Las contraseñas no coinciden');
+            isValid = false;
+        }
+
+        if (password.length < 8) {
+            showError('password', 'La contraseña debe tener al menos 8 caracteres');
+            isValid = false;
+        }
+
+        // Solo si pasó las validaciones básicas, verificar disponibilidad
+        if (isValid) {
+            const [isUsernameAvailable, isEmailAvailable] = await Promise.all([
+                checkAvailability('username', username),
+                checkAvailability('email', email)
+            ]);
+
+            if (!isUsernameAvailable) {
+                showError('username', 'Este nombre de usuario ya está en uso');
+                isValid = false;
+            }
+
+            if (!isEmailAvailable) {
+                showError('email', 'Este correo ya está registrado');
+                isValid = false;
+            }
+
+            if (isValid) {
+                this.submit();
+            }
+        }
+    });
+</script>
+
+
+</body>
+</html>

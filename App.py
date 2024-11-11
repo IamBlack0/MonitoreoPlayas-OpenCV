@@ -1,30 +1,31 @@
-from flask import Flask, render_template, request, redirect, url_for
+from flask import Flask
+from config import Config
+import pathlib
 import os
-from analysis import analyze_image
+from ultralytics import YOLO
+
+# Configuración inicial
+temp = pathlib.PosixPath
+pathlib.PosixPath = pathlib.WindowsPath
 
 app = Flask(__name__)
-UPLOAD_FOLDER = './static/uploads'
-app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+app.config['UPLOAD_FOLDER'] = 'static/uploads'
+app.config['RESULTS_FOLDER'] = 'static/results'
+app.config['CROPS_FOLDER'] = 'static/crops'
+app.secret_key = 'desarrollo-key'
 
-@app.route('/')
-def index():
-    return render_template('index.html')
+# Asegurar que las carpetas existan
+os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
+os.makedirs(app.config['RESULTS_FOLDER'], exist_ok=True)
+os.makedirs(app.config['CROPS_FOLDER'], exist_ok=True)
 
-@app.route('/upload', methods=['POST'])
-def upload_image():
-    if 'file' not in request.files:
-        return redirect(request.url)
-    file = request.files['file']
-    if file.filename == '':
-        return redirect(request.url)
-    if file:
-        filepath = os.path.join(app.config['UPLOAD_FOLDER'], file.filename)
-        file.save(filepath)
-        
-        # Llamada a la función que analizará la imagen
-        results = analyze_image(filepath)
-        
-        return render_template('result.html', results=results, image_path=filepath)
+# Cargar modelos
+model_mar = YOLO('model/segmentacion_playas.pt')
+model_turbidez = YOLO('model/turbidez.pt')
+model_basura = YOLO('model/detectar_basura.pt')
+
+# Importar rutas después de crear la app
+from routes import *
 
 if __name__ == "__main__":
     app.run(debug=True)
