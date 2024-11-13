@@ -1,3 +1,4 @@
+# routes.py
 from flask import render_template, request, redirect, url_for, send_from_directory, session
 from werkzeug.security import generate_password_hash, check_password_hash
 from functools import wraps
@@ -5,7 +6,7 @@ import os
 import time
 import cv2
 import traceback
-from app import app, model_mar, model_turbidez, model_basura
+from init import app, model_mar, model_turbidez, model_basura
 from config import dbconfig
 from utils import *
 import mysql.connector
@@ -241,7 +242,7 @@ def upload_image():
                     x1, y1, x2, y2 = map(int, result.boxes[i].xyxy[0])
                     image = cv2.imread(input_path)
                     crop = image[y1:y2, x1:x2]
-                    crop_filename = f"{timestamp}_crop_{i}.jpg"
+                    crop_filename = f"{timestamp}crop{i}.jpg"
                     crop_path = os.path.join(app.config['CROPS_FOLDER'], crop_filename)
                     cv2.imwrite(crop_path, crop)
                     mar_crops.append(crop_path)
