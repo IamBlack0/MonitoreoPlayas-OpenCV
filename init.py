@@ -16,6 +16,7 @@ os.makedirs(app.config['RESULTS_FOLDER'], exist_ok=True)
 os.makedirs(app.config['CROPS_FOLDER'], exist_ok=True)
 
 # Cargar modelos
+
 model_mar = YOLO('model/segmentacion_playas.pt')
 model_turbidez = YOLO('model/turbidez.pt')
 model_basura = YOLO('model/Detectar_Basura_es.pt')
