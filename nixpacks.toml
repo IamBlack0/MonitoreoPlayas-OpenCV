@@ -1,11 +1,11 @@
 [phases.setup]
 apt_pkgs = [
-  "libgl1",              # OpenGL library
-  "libglib2.0-0",        # GLib for graphics
-  "libgl1-mesa-glx",     # Mesa OpenGL implementation
-  "libglib2.0-bin",      # Extra GLib utilities
-  "libxrender1",         # For rendering
-  "libxext6",            # X11 extension library
-  "libsm6",              # Session management library
-  "libx11-6"             # Core X11 client-side library
+  "libgl1-mesa-glx",
+  "libglib2.0-0",
+  "libsm6",
+  "libxext6",
+  "libxrender1"
 ]
+
+[start]
+cmd = "gunicorn App:app --bind 0.0.0.0:$PORT"
