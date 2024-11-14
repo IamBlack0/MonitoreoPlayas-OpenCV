@@ -1,13 +1,8 @@
 # init.py
 from flask import Flask
 from config import Config
-import pathlib
 import os
 from ultralytics import YOLO
-
-# Configuración inicial
-temp = pathlib.PosixPath
-pathlib.PosixPath = pathlib.WindowsPath
 
 app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = 'static/uploads'

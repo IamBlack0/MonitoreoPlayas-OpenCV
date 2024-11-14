@@ -1,1 +1,0 @@
-web: ls -la && gunicorn app:app
